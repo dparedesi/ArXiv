@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>arXiv CS Papers Leaderboard 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+            line-height: 1;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        
+        .chart-section {
+            flex: 1;
+            min-width: 60%;
+            padding: 40px;
+        }
+        
+        .leaderboard-section {
+            flex: 0 0 400px;
+            background: #f8f9fa;
+            padding: 40px 30px;
+            border-left: 1px solid #e0e0e0;
+        }
+        
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #333;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 650px;
+        }
+        
+        .leaderboard {
+            list-style: none;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .leaderboard-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .rank {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #999;
+            min-width: 35px;
+        }
+        
+        .color-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 12px;
+        }
+        
+        .name {
+            flex: 1;
+            font-size: 0.95em;
+            color: #333;
+            line-height: 1.3;
+        }
+        
+        .count {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #667eea;
+            margin-right: 10px;
+        }
+        
+        .percentage {
+            font-size: 0.85em;
+            color: #999;
+        }
+        
+        .insights-section {
+            flex: 0 0 350px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            min-height: 650px;
+        }
+        
+        .insight-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .insight-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .insight-icon {
+            font-size: 2em;
+            margin-right: 15px;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .insight-content {
+            flex: 1;
+        }
+        
+        .insight-title {
+            font-size: 0.85em;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        
+        .insight-name {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .insight-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+        
+        .insight-detail {
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        @media (max-width: 1024px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .leaderboard-section {
+                flex: 1;
+                border-left: none;
+                border-top: 1px solid #e0e0e0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 arXiv CS Papers Leaderboard</h1>
+            <p>Computer Science Research Trends • 2025</p>
+        </div>
+        
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value">110,649</div>
+                <div class="stat-label">Total Papers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">11</div>
+                <div class="stat-label">Months</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">11</div>
+                <div class="stat-label">Categories</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="chart-section">
+                <h2 class="section-title">Section 1: Monthly Publication Trends (Absolute)</h2>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="leaderboard-section">
+                <h2 class="section-title">Leaderboard</h2>
+                <ul class="leaderboard" id="leaderboard">
+                </ul>
+            </div>
+        </div>
+        
+        <div class="content" style="margin-top: 50px;">
+            <div class="chart-section">
+                <h2 class="section-title">Section 2: Monthly Distribution (Percentage)</h2>
+                <div class="chart-container">
+                    <canvas id="percentageChart"></canvas>
+                </div>
+            </div>
+            <div class="insights-section">
+                <h2 class="section-title">📊 Key Insights</h2>
+                
+    <div class="insight-card">
+        <div class="insight-icon">📈</div>
+        <div class="insight-content">
+            <div class="insight-title">Highest Growth</div>
+            <div class="insight-name">Artificial Intelligence</div>
+            <div class="insight-value">+5.3% CAGR</div>
+            <div class="insight-detail">4.8% → 8.1%</div>
+        </div>
+    </div>
+    
+    <div class="insight-card">
+        <div class="insight-icon">📉</div>
+        <div class="insight-content">
+            <div class="insight-title">Biggest Decline</div>
+            <div class="insight-name">Computers and Society</div>
+            <div class="insight-value">-6.4% CAGR</div>
+            <div class="insight-detail">2.9% → 1.5%</div>
+        </div>
+    </div>
+    
+    <div class="insight-card">
+        <div class="insight-icon">🚀</div>
+        <div class="insight-content">
+            <div class="insight-title">Biggest Gain</div>
+            <div class="insight-name">Artificial Intelligence</div>
+            <div class="insight-value">+3.3 percentage points</div>
+            <div class="insight-detail">4.8% → 8.1%</div>
+        </div>
+    </div>
+    
+    <div class="insight-card">
+        <div class="insight-icon">📊</div>
+        <div class="insight-content">
+            <div class="insight-title">Smoothed Growth Leader</div>
+            <div class="insight-name">Artificial Intelligence</div>
+            <div class="insight-value">+2.0pp trend</div>
+            <div class="insight-detail">4.8% → 6.8% (6mo avg)</div>
+        </div>
+    </div>
+    
+            </div>
+        </div>
+        
+        <div class="content" style="margin-top: 50px;">
+            <div class="chart-section">
+                <h2 class="section-title">Section 3: 6-Month Trailing Average (Percentage)</h2>
+                <div class="chart-container">
+                    <canvas id="trailingChart"></canvas>
+                </div>
+            </div>
+            <div class="insights-section">
+                <h2 class="section-title">📊 Trailing Insights</h2>
+                
+    <div class="insight-card">
+        <div class="insight-icon">📉</div>
+        <div class="insight-content">
+            <div class="insight-title">Smoothed Decline</div>
+            <div class="insight-name">Others</div>
+            <div class="insight-value">-2.7pp trend</div>
+            <div class="insight-detail">19.7% → 17.0% (6mo avg)</div>
+        </div>
+    </div>
+    
+    <div class="insight-card">
+        <div class="insight-icon">📉</div>
+        <div class="insight-content">
+            <div class="insight-title">Strongest Trend</div>
+            <div class="insight-name">Others</div>
+            <div class="insight-value">Clear downward trajectory</div>
+            <div class="insight-detail">Current: 16.8% (6mo avg)</div>
+        </div>
+    </div>
+    
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const monthLabels = ["Jan 2025", "Feb 2025", "Mar 2025", "Apr 2025", "May 2025", "Jun 2025", "Jul 2025", "Aug 2025", "Sep 2025", "Oct 2025", "Nov 2025"];
+        const subcategoriesData = [{"name": "Computer Vision and Pattern Recognition", "data": [1089, 1164, 2518, 1811, 2188, 2271, 2412, 2803, 2886, 2993, 1105], "total": 23240, "color": "#E91E63"}, {"name": "Machine Learning", "data": [1091, 1542, 1543, 1359, 2514, 2268, 1954, 2183, 2816, 3822, 1232], "total": 22324, "color": "#FF9800"}, {"name": "Others", "data": [1118, 1351, 1406, 1645, 1904, 1820, 2087, 2021, 2370, 2233, 954], "total": 18909, "color": "#4CAF50"}, {"name": "Computation and Language", "data": [601, 1056, 1034, 871, 1844, 1772, 1278, 1540, 2139, 2485, 675], "total": 15295, "color": "#2196F3"}, {"name": "Artificial Intelligence", "data": [261, 364, 346, 371, 781, 706, 718, 840, 997, 1271, 444], "total": 7099, "color": "#9C27B0"}, {"name": "Robotics", "data": [256, 397, 635, 540, 688, 632, 681, 737, 1123, 950, 335], "total": 6974, "color": "#00BCD4"}, {"name": "Cryptography and Security", "data": [273, 326, 338, 434, 534, 517, 453, 510, 676, 686, 224], "total": 4971, "color": "#FFC107"}, {"name": "Human-Computer Interaction", "data": [210, 345, 395, 391, 320, 343, 387, 433, 503, 322, 148], "total": 3797, "color": "#795548"}, {"name": "Software Engineering", "data": [222, 251, 269, 327, 283, 331, 364, 335, 414, 519, 171], "total": 3486, "color": "#607D8B"}, {"name": "Information Retrieval", "data": [120, 165, 142, 210, 254, 219, 241, 334, 251, 279, 84], "total": 2299, "color": "#F44336"}, {"name": "Computers and Society", "data": [159, 182, 183, 197, 230, 212, 213, 248, 277, 271, 83], "total": 2255, "color": "#9E9E9E"}];
+        const trailingAvgData = [{"name": "Computer Vision and Pattern Recognition", "data": [20.166666666666664, 18.231170376592466, 21.682247689666102, 21.81281377117307, 21.242278746574506, 21.114575900749696, 21.47982741477762, 22.6621349602155, 21.226326972069284, 20.676565641763226, 20.892650080326526], "color": "#E91E63"}, {"name": "Machine Learning", "data": [20.203703703703706, 20.895635976169366, 19.769149529956177, 18.992507071449477, 19.551024721284364, 19.700689386572062, 19.352191741726624, 18.790256134644373, 19.118425421875887, 20.36507967443671, 20.49836122121326], "color": "#FF9800"}, {"name": "Others", "data": [20.703703703703706, 19.808662715634576, 18.526091486890298, 18.936868762298673, 18.449321699613638, 18.109385009648577, 17.883029250849358, 17.54145099674466, 17.61447854341739, 16.603817872193, 16.768719400955455], "color": "#4CAF50"}, {"name": "Computation and Language", "data": [11.12962962962963, 12.956666977771556, 12.550443062564016, 12.082645931057392, 12.861957299438634, 13.381117453195827, 13.500595199388442, 13.178389026689464, 13.688843091928227, 14.52514235110405, 13.924270028265171], "color": "#2196F3"}, {"name": "Artificial Intelligence", "data": [4.833333333333333, 4.964615707685846, 4.619010842623425, 4.601457739618378, 5.034719051313419, 5.256519475108732, 5.560221118910486, 5.8791290709695145, 6.374278742550962, 6.9542376001207105, 7.1828305043034035], "color": "#9C27B0"}, {"name": "Robotics", "data": [4.7407407407407405, 5.149314791481948, 5.835722102256365, 6.0320147252945295, 6.017986130322279, 5.96470743330962, 6.226678896801292, 6.3253418378726884, 6.419010848708182, 6.315676139781715, 6.345556665335839], "color": "#00BCD4"}, {"name": "Cryptography and Security", "data": [5.055555555555555, 4.80973213869056, 4.485483059728697, 4.694421269784262, 4.681013618946993, 4.677750882678231, 4.535009977145335, 4.48363756222603, 4.623732291895679, 4.45907133625881, 4.3722282458192545], "color": "#FFC107"}, {"name": "Human-Computer Interaction", "data": [3.888888888888889, 4.359396145410425, 4.400947564605929, 4.499214842164599, 4.153964594702217, 3.9770700958616807, 3.926808488314199, 3.724016399296167, 3.5567558537648485, 3.096750400546462, 3.086774339914888], "color": "#795548"}, {"name": "Software Engineering", "data": [4.111111111111112, 3.8125204162583417, 3.5595786390297603, 3.672013552592575, 3.428078779682379, 3.3541326109350873, 3.23130065773606, 3.11154468058146, 3.0800380683219895, 2.958214663810463, 3.0719478444317], "color": "#607D8B"}, {"name": "Information Retrieval", "data": [2.2222222222222223, 2.266088011573102, 2.0480545876525866, 2.1797388318625393, 2.1839990377603953, 2.149094861283965, 2.151051768135199, 2.2305677011810237, 2.251367050570306, 2.1159626198386277, 2.0057679225066942], "color": "#F44336"}, {"name": "Computers and Society", "data": [2.944444444444444, 2.746196742731812, 2.5232714350266416, 2.496303502704508, 2.39565632036118, 2.3149568906565268, 2.153285486215378, 2.0735316295791155, 2.04674311489724, 1.9294817001462246, 1.8508937469278062], "color": "#9E9E9E"}];
+        const totalPapers = 110649;
+        const monthlyTotals = [5400, 7143, 8809, 8156, 11540, 11091, 10788, 11984, 14452, 15831, 5455];
+        
+        // Calculate max Y value for percentage chart (max percentage + 5% padding)
+        const maxPercentage = Math.max(...subcategoriesData.map(subcat => 
+            Math.max(...subcat.data.map((value, index) => 
+                monthlyTotals[index] > 0 ? (value / monthlyTotals[index] * 100) : 0
+            ))
+        ));
+        const chartMaxY = Math.ceil(maxPercentage + 5);
+        
+        // Store original colors
+        const originalColors = subcategoriesData.map(s => s.color);
+        
+        // Function to dim colors
+        function dimColor(color, opacity = 0.2) {
+            const r = parseInt(color.slice(1, 3), 16);
+            const g = parseInt(color.slice(3, 5), 16);
+            const b = parseInt(color.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+        
+        // Create datasets for Chart.js (absolute values)
+        const datasets = subcategoriesData.map(subcat => ({
+            label: subcat.name,
+            data: subcat.data,
+            backgroundColor: subcat.color,
+            borderColor: subcat.color,
+            borderWidth: 0,
+        }));
+        
+        // Create datasets for percentage chart
+        const percentageDatasets = subcategoriesData.map(subcat => ({
+            label: subcat.name,
+            data: subcat.data.map((value, index) => 
+                monthlyTotals[index] > 0 ? (value / monthlyTotals[index] * 100) : 0
+            ),
+            backgroundColor: subcat.color,
+            borderColor: subcat.color,
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.3,
+            fill: false
+        }));
+        
+        // Create the chart
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthLabels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'x',
+                        intersect: false,
+                        position: 'nearest',
+                        xAlign: 'left',
+                        yAlign: 'top',
+                        callbacks: {
+                            footer: function(tooltipItems) {
+                                let sum = 0;
+                                tooltipItems.forEach(function(tooltipItem) {
+                                    sum += tooltipItem.parsed.y;
+                                });
+                                return 'Total: ' + sum;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'y',
+                    intersect: true
+                },
+                onHover: (event, activeElements) => {
+                    if (activeElements.length > 0) {
+                        const datasetIndex = activeElements[0].datasetIndex;
+                        chart.data.datasets.forEach((dataset, index) => {
+                            if (index === datasetIndex) {
+                                dataset.backgroundColor = originalColors[index];
+                            } else {
+                                dataset.backgroundColor = dimColor(originalColors[index]);
+                            }
+                        });
+                        chart.update('none');
+                    } else {
+                        chart.data.datasets.forEach((dataset, index) => {
+                            dataset.backgroundColor = originalColors[index];
+                        });
+                        chart.update('none');
+                    }
+                }
+            }
+        });
+        
+        // Create the percentage chart
+        const ctx2 = document.getElementById('percentageChart').getContext('2d');
+        const chart2 = new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: percentageDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'x',
+                        intersect: false,
+                        position: 'nearest',
+                        xAlign: 'left',
+                        yAlign: 'top',
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y.toFixed(1) + '%';
+                                return label;
+                            },
+                            footer: function(tooltipItems) {
+                                let sum = 0;
+                                tooltipItems.forEach(function(tooltipItem) {
+                                    sum += tooltipItem.parsed.y;
+                                });
+                                return 'Total: ' + sum.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: chartMaxY,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'y',
+                    intersect: true
+                },
+                onHover: (event, activeElements) => {
+                    if (activeElements.length > 0) {
+                        const datasetIndex = activeElements[0].datasetIndex;
+                        chart2.data.datasets.forEach((dataset, index) => {
+                            if (index === datasetIndex) {
+                                dataset.backgroundColor = originalColors[index];
+                                dataset.borderWidth = 4;
+                            } else {
+                                dataset.backgroundColor = dimColor(originalColors[index]);
+                                dataset.borderWidth = 1;
+                            }
+                        });
+                        chart2.update('none');
+                    } else {
+                        chart2.data.datasets.forEach((dataset, index) => {
+                            dataset.backgroundColor = originalColors[index];
+                            dataset.borderWidth = 2;
+                        });
+                        chart2.update('none');
+                    }
+                }
+            }
+        });
+        
+        // Populate leaderboard
+        const leaderboard = document.getElementById('leaderboard');
+        subcategoriesData.forEach((subcat, index) => {
+            const percentage = ((subcat.total / totalPapers) * 100).toFixed(1);
+            const item = document.createElement('li');
+            item.className = 'leaderboard-item';
+            item.innerHTML = `
+                <div class="rank">${index + 1}.</div>
+                <div class="color-badge" style="background-color: ${subcat.color}"></div>
+                <div class="name">${subcat.name}</div>
+                <div class="count">${subcat.total.toLocaleString()}</div>
+                <div class="percentage">${percentage}%</div>
+            `;
+            leaderboard.appendChild(item);
+        });
+        
+        // Create the trailing average chart (Section 3)
+        const trailingDatasets = trailingAvgData.map(subcat => ({
+            label: subcat.name,
+            data: subcat.data,
+            borderColor: subcat.color,
+            backgroundColor: subcat.color,
+            tension: 0.3,
+            fill: false,
+            borderWidth: 2,
+            pointRadius: 3,
+            pointHoverRadius: 5
+        }));
+        
+        const originalColorsTrailing = trailingDatasets.map(d => d.borderColor);
+        
+        // Calculate max Y for trailing chart
+        const trailingMaxY = Math.ceil(Math.max(...trailingAvgData.flatMap(d => d.data)) + 5);
+        
+        const ctx3 = document.getElementById('trailingChart').getContext('2d');
+        const chart3 = new Chart(ctx3, {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: trailingDatasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'x',
+                        intersect: false,
+                        position: 'nearest',
+                        xAlign: 'left',
+                        yAlign: 'top',
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.parsed.y.toFixed(1) + '% (6mo avg)';
+                                return label;
+                            },
+                            footer: function(tooltipItems) {
+                                let sum = 0;
+                                tooltipItems.forEach(function(tooltipItem) {
+                                    sum += tooltipItem.parsed.y;
+                                });
+                                return 'Total: ' + sum.toFixed(1) + '%';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: true,
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: trailingMaxY,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        ticks: {
+                            font: {
+                                size: 11
+                            },
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'y',
+                    intersect: true
+                },
+                onHover: (event, activeElements) => {
+                    if (activeElements.length > 0) {
+                        const datasetIndex = activeElements[0].datasetIndex;
+                        chart3.data.datasets.forEach((dataset, index) => {
+                            if (index === datasetIndex) {
+                                dataset.backgroundColor = originalColorsTrailing[index];
+                                dataset.borderWidth = 4;
+                            } else {
+                                dataset.backgroundColor = dimColor(originalColorsTrailing[index]);
+                                dataset.borderWidth = 1;
+                            }
+                        });
+                        chart3.update('none');
+                    } else {
+                        chart3.data.datasets.forEach((dataset, index) => {
+                            dataset.backgroundColor = originalColorsTrailing[index];
+                            dataset.borderWidth = 2;
+                        });
+                        chart3.update('none');
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
