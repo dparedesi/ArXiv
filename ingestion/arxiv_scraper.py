@@ -52,11 +52,22 @@ def scrape_arxiv_paper(url):
         og_title_tag = soup.find('meta', property='og:title')
         og_title = og_title_tag.get('content', '') if og_title_tag else ''
         
-        # Extract submission date from citation_online_date meta tag
+        # Extract original submission date from the dateline div (e.g., "[Submitted on 28 Dec 2024]")
         submitted_on = ''
-        citation_date_tag = soup.find('meta', attrs={'name': 'citation_online_date'})
-        if citation_date_tag:
-            submitted_on = citation_date_tag.get('content', '').replace('/', '-')
+        dateline_div = soup.find('div', class_='dateline')
+        if dateline_div:
+            dateline_text = dateline_div.get_text()
+            # Extract the original submission date using regex
+            # Format: [Submitted on 28 Dec 2024 (v1), last revised 25 Apr 2025 (this version, v2)]
+            match = re.search(r'\[Submitted on (\d{1,2} \w{3} \d{4})', dateline_text)
+            if match:
+                date_str = match.group(1)
+                # Convert to YYYY-MM-DD format
+                try:
+                    date_obj = datetime.strptime(date_str, '%d %b %Y')
+                    submitted_on = date_obj.strftime('%Y-%m-%d')
+                except ValueError:
+                    submitted_on = ''
         
         # Extract abstract content
         abstract_content = ''

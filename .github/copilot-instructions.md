@@ -1,5 +1,8 @@
 # GitHub Copilot Instructions
 
+1. Never use em dashes
+2. Never use Title Case in headings, only sentence case
+
 ## What This Repository Does
 
 Data pipeline for Computer Science research papers from arXiv.org:

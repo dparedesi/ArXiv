@@ -11,6 +11,7 @@ Automated pipeline that:
 2. **Summarizes** abstracts with AI (Codex CLI)  
 3. **Filters** by research subcategory (48 areas)
 4. **Visualizes** trends over time
+5. **Generates** weekly research digest articles
 
 ## Structure
 
@@ -20,6 +21,7 @@ arXiv/
 ├── enrichment/     # AI summarization pipeline
 ├── analysis/       # Category filtering tools
 ├── visualization/  # Interactive dashboard
+├── weekly_digest/  # Weekly research digest generator ✨ NEW
 ├── data/          # Monthly CSV files (111K+ papers)
 └── config/        # Prompt templates
 ```
@@ -38,7 +40,36 @@ cd enrichment && python batch_summarizer.py
 
 # Generate dashboard
 cd visualization && python leaderboard_viz.py
+
+# Generate weekly digest (NEW!)
+cd weekly_digest && python extract_weekly_papers.py
 ```
+
+## Weekly Research Digest ✨ NEW
+
+Automated system for generating curated weekly research summaries:
+
+```bash
+cd weekly_digest
+
+# Extract papers from last week
+python extract_weekly_papers.py
+
+# Prepare article generation prompt
+python prepare_article_prompt.py
+
+# Generate article using your AI tool (Codex/ChatGPT/Claude)
+# See weekly_digest/QUICKSTART.md for details
+```
+
+**Features:**
+- Automatically calculates last Friday's week number
+- Samples 3,850 papers from the target week
+- Generates customized prompts with previous article context
+- Produces 3-5 minute Medium-style articles
+- Tracks research trends week-over-week
+
+[📖 Read the Quick Start Guide](weekly_digest/QUICKSTART.md) | [📝 Full Documentation](weekly_digest/README.md)
 
 ## Data Schema
 
