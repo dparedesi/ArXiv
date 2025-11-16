@@ -1,7 +1,7 @@
 # GitHub Copilot Instructions
 
 1. Never use em dashes
-2. Never use Title Case in headings, only sentence case
+2. In titles & headers: Never use Title Case in headings, only sentence case
 
 ## What This Repository Does
 
