@@ -102,7 +102,11 @@ def load_all_csvs():
         
         # Combine all dataframes
         combined_df = pd.concat(dfs, ignore_index=True)
+        
+        # Shuffle the dataframe randomly
+        combined_df = combined_df.sample(frac=1, random_state=42).reset_index(drop=True)
         print(f"\n✓ Combined total: {len(combined_df)} papers from {len(csv_files)} files")
+        print(f"✓ Shuffled dataframe randomly")
         return combined_df, len(csv_files)
     except Exception as e:
         print(f"Error loading CSVs: {e}")

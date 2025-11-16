@@ -2,7 +2,7 @@
 
 ## Purpose & Scope
 
-Create a Medium/LinkedIn article (4-5 minute read, approximately 1000-1250 words) based on the provided .csv file of recent arXiv research papers. Absorb the content, connect the dots, and grasp the most important/breakthrough concepts while being mindful of where the research community is concentrating its efforts.
+Create a Medium/LinkedIn article (10-12 minute read, approximately 1800-2200 words) based on the provided .csv file of recent arXiv research papers. Absorb the content, connect the dots, and grasp the most important/breakthrough concepts while being mindful of where the research community is concentrating its efforts.
 
 **Format:** Single article file, no introductory fluff or personal anecdotes. Target 4-5 subsections with substantial depth in each to reach the required length.
 
